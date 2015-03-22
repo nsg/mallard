@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Simple wrapper script to keep monit happy. This script
+# maintains a pid file and provides a start/stop utility
+# for the swarm container.
+
+case $1 in
+  start)
+    (setsid $0 start2 &)
+    ;;
+  start2)
+    $0 stop
+    echo $$ > /var/run/swarm.pid
+    /usr/bin/docker run --rm=false \
+      --name="swarm" \
+      swarm join \
+        --addr={{ ansible_mallard.ipv4.address }}:2375 \
+        etcd://172.17.42.1:4001/swarm
+    ;;
+  stop)
+    /usr/bin/docker stop swarm
+    /usr/bin/docker rm swarm
+    kill $(cat /var/run/swarm.pid)
+    ;;
+  *)
+    echo "Error, command $1 not found"
+    exit 1
+    ;;
+esac

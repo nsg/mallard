@@ -1,0 +1,90 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Install tinc
+      apt:
+        name: tinc
+
+    - name: Create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+
+      with_items:
+        - /etc/tinc/mallard
+        - /etc/tinc/mallard/hosts
+
+    - name: Setup tinc.conf
+      template:
+        src: templates/tinc.conf.j2
+        dest: /etc/tinc/mallard/tinc.conf
+      notify: restart tinc
+
+    - name: Setup tinc daemon
+      lineinfile:
+        dest: /etc/default/tinc
+        regexp: ^EXTRA
+        line: 'EXTRA="--logfile"'
+      notify: restart tinc
+
+    - name: Setup nets.boot
+      lineinfile:
+        dest: /etc/tinc/nets.boot
+        regexp: ^mallard
+        line: 'mallard'
+      notify: restart tinc
+
+    - name: Setup tinc-up/down
+      template:
+        src: "templates/{{ item }}.j2"
+        dest: "/etc/tinc/mallard/{{ item }}"
+        mode: 0750
+      with_items:
+        - tinc-up
+        - tinc-down
+      notify: restart tinc
+
+    - name: Generate private and public key
+      command: tincd -K4096 creates=/etc/tinc/rsa_key.priv
+      notify: restart tinc
+      register: new_key
+
+    - name: Symlink private key in place
+      file: src=/etc/tinc/rsa_key.priv dest=/etc/tinc/mallard/rsa_key.priv state=link
+
+    - name: Setup hosts file
+      template:
+        src: templates/tinc.host.j2
+        dest: "/etc/tinc/mallard/hosts/{{ ansible_hostname }}.conf"
+      notify: restart tinc
+      register: new_host_conf
+
+    - name: Merge public key and config
+      shell: "cat /etc/tinc/rsa_key.pub /etc/tinc/mallard/hosts/{{ ansible_hostname }}.conf > /etc/tinc/mallard/hosts/{{ ansible_hostname }}"
+      notify: restart tinc
+      when: new_key|changed or new_host_conf|changed
+
+    - name: Download the host files
+      fetch:
+        src: "/etc/tinc/mallard/hosts/{{ ansible_hostname }}"
+        dest: "/tmp/mallard-hostfiles/{{ ansible_hostname }}"
+        flat: yes
+
+  handlers:
+    - name: restart tinc
+      service: name=tinc state=restarted sleep=2
+
+- hosts: all
+  tasks:
+    - name: Upload host files
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/tinc/mallard/hosts/"
+      with_fileglob:
+        - /tmp/mallard-hostfiles/*
+      notify: restart tinc
+
+  handlers:
+    - name: restart tinc
+      service: name=tinc state=restarted sleep=2

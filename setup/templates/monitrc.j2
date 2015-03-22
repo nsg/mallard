@@ -1,0 +1,40 @@
+set daemon 30
+#with start delay 60
+set logfile /var/log/monit.log
+set idfile /var/lib/monit/id
+set statefile /var/lib/monit/state
+
+set eventqueue
+  basedir /var/lib/monit/events
+  slots 100
+
+set httpd port 2812 and
+  use address localhost
+  allow localhost
+
+check process docker with pidfile /var/run/docker.pid
+  start program "/usr/sbin/service docker start"
+  stop program "/usr/sbin/service docker stop"
+  depends on tinc_mallard
+
+check process tinc_mallard with pidfile /var/run/tinc.mallard.pid
+  start program "/usr/sbin/service tinc start"
+  stop program "/usr/sbin/service tinc stop"
+
+check process etcd pidfile /var/run/etcd.pid
+  if failed host 172.17.42.1 port 4001 then restart
+  stop program "/usr/local/bin/etcd-manager stop"
+  start program "/usr/local/bin/etcd-manager start"
+  depends on docker
+
+check process swarm pidfile /var/run/swarm.pid
+  stop program "/usr/local/bin/swarm-manager stop"
+  start program "/usr/local/bin/swarm-manager start"
+  depends on etcd
+
+{% for host in groups['all'] %}
+{% if host != ansible_hostname %}
+check host {{ host }} with address {{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}
+  if failed port 2375 then alert
+{% endif %}
+{% endfor %}

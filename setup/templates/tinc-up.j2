@@ -1,0 +1,7 @@
+#!/bin/bash
+
+{% for host in groups['all'] -%}
+  {% if host == ansible_hostname -%}
+    ifconfig mallard 10.10.0.{{ loop.index }} netmask 255.255.255.0 up
+  {%- endif %}
+{% endfor %}

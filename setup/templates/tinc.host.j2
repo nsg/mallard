@@ -1,0 +1,12 @@
+{% if ansible_virtualization_type == 'virtualbox' -%}
+  Address={{ ansible_eth1.ipv4.address }}
+{% else -%}
+  Address={{ ansible_default_ipv4.address }}
+{% endif %}
+Port=655
+Compression=0
+{% for host in groups['all'] -%}
+  {% if host == ansible_hostname -%}
+    Subnet=10.10.0.{{ loop.index }}/32
+  {%- endif %}
+{% endfor %}

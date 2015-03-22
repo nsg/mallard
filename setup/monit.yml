@@ -1,0 +1,46 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Install monit
+      apt: name=monit
+
+    - name: Setup monitrc
+      template:
+        src: templates/monitrc.j2
+        dest: /etc/monit/monitrc
+      notify: restart monit
+
+    - name: Install etcd-manager
+      template:
+        src: templates/etcd-manager.j2
+        dest: /usr/local/bin/etcd-manager
+        mode: 0750
+      notify:
+        - restart monit
+        - stop etcd
+
+    - name: Install swarm-manager
+      template:
+        src: templates/swarm-manager.j2
+        dest: /usr/local/bin/swarm-manager
+        mode: 0750
+      notify:
+        - restart monit
+        - stop swarm
+
+    - name: Install etcd_getIDbyName
+      template:
+        src: templates/etcd_getIDbyName.j2
+        dest: /usr/local/bin/etcd_getIDbyName
+        mode: 0750
+
+  handlers:
+    - name: restart monit
+      service: name=monit state=restarted
+    - name: stop etcd
+      shell: docker stop etcd
+      ignore_errors: yes
+    - name: stop swarm
+      shell: docker stop swarm
+      ignore_errors: yes

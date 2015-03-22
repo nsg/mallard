@@ -1,0 +1,31 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Setup Docker repo key
+      apt_key:
+        keyserver: "hkp://keyserver.ubuntu.com:80"
+        id: "36A1D7869245C8950F966E92D8576A8BA88D21E9"
+
+    - name: Setup Docker repo path
+      apt_repository:
+        repo: 'deb https://get.docker.com/ubuntu docker main'
+        state: present
+
+    - name: Install docker
+      apt:
+        name: lxc-docker
+
+    - name: Bind docker to mallard 10.0.0.0/24 network
+      lineinfile:
+        dest: /etc/default/docker
+        regexp: ^DOCKER_OPTS
+        line: 'DOCKER_OPTS="--dns 8.8.8.8 --dns 8.8.4.4 -H {{ ansible_mallard["ipv4"]["address"] }}:2375 -H unix:///var/run/docker.sock"'
+      notify: restart docker
+
+    - name: Do not start docker on boot (let monit manage that)
+      service: name=docker enabled=no
+
+  handlers:
+    - name: restart docker
+      service: name=docker state=restarted
