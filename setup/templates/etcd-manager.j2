@@ -4,6 +4,13 @@
 # maintains a pid file and provides a start/stop utility
 # for the etcd container.
 
+remove_host_from_etcd() {
+  local hostid=$(etcd_getIDbyName {{ ansible_hostname }})
+{% for host in groups['all'] %}
+  curl -X DELETE http://{{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}:4001/v2/members/$hostid || :
+{% endfor %}
+}
+
 case $1 in
   start)
     (setsid $0 start2 &)
@@ -12,7 +19,7 @@ case $1 in
     $0 stop
     echo $$ > /var/run/etcd.pid
     /usr/bin/docker run --rm=false \
-      -p 172.17.42.1:4001:4001 \
+      -p {{ ansible_mallard.ipv4.address }}:4001:4001 \
       -p {{ ansible_mallard.ipv4.address }}:2380:2380 \
       --name="etcd" \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
@@ -28,7 +35,7 @@ case $1 in
   stop)
     /usr/bin/docker stop etcd
     /usr/bin/docker rm etcd
-    curl -X DELETE http://172.17.42.1:4001/v2/members/$(etcd_getIDbyName {{ ansible_hostname }}) || :
+    remove_host_from_etcd
     kill $(cat /var/run/etcd.pid)
     ;;
   *)

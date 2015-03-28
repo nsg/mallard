@@ -4,7 +4,17 @@ import json
 import urllib2
 import socket
 
-response = urllib2.urlopen('http://172.17.42.1:4001/v2/members/')
+
+hosts=[{% for host in groups['all'] %}"{{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}", {% endfor %}]
+
+for h in hosts:
+    try:
+        response = urllib2.urlopen('http://{}:4001/v2/members/'.format(h))
+    except URLError:
+        pass
+    else:
+        break
+
 js = json.loads(response.read())
 
 for j in js['members']:

@@ -27,7 +27,8 @@
         mode: 0750
       notify:
         - restart monit
-        - stop swarm
+        - stop swarm agent
+        - stop swarm manager
 
     - name: Install etcd_getIDbyName
       template:
@@ -41,6 +42,9 @@
     - name: stop etcd
       shell: docker stop etcd
       ignore_errors: yes
-    - name: stop swarm
-      shell: docker stop swarm
+    - name: stop swarm agent
+      shell: docker stop swarm-agent
+      ignore_errors: yes
+    - name: stop swarm manager
+      shell: docker stop swarm-manager
       ignore_errors: yes
