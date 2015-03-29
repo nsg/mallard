@@ -1,6 +1,26 @@
 ---
 
-- include: tinc.yml
-- include: docker.yml
-- include: consul.yml
-- include: monit.yml
+- name: Install and setup tinc
+  hosts: all
+  roles:
+
+    # Install, configure and download public keys/config.
+    - role: tinc
+      tinc_install: true
+
+    # Upload public keys/config from all servers, to all servers.
+    - role: tinc
+      tinc_upload: true
+
+- name: Install and setup monit, docker and consul
+  hosts: all
+  roles:
+
+    # Setup monit to manage and monitor processes
+    - monit
+
+    # Setup docker and swarm
+    - docker
+
+    # Setup consul
+    - consul

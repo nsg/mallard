@@ -1,0 +1,7 @@
+---
+
+- include: install.yml
+  when: tinc_install is defined and tinc_install
+
+- include: upload.yml
+  when: tinc_upload is defined and tinc_upload

@@ -1,0 +1,9 @@
+---
+
+- name: Upload host files
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/tinc/mallard/hosts/"
+  with_fileglob:
+    - /tmp/mallard-hostfiles/*
+  notify: restart tinc
