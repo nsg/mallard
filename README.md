@@ -1,5 +1,7 @@
 # Mallard
 
+![Mallard](http://i.imgur.com/K11jKCu.jpg)
+
 Manage your flock of containers.
 
 ## Basic idea
