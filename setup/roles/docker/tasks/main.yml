@@ -35,7 +35,10 @@
   get_url:
     url: "https://github.com/docker/compose/releases/download/1.2.0rc2/docker-compose-Linux-x86_64"
     dest: "/usr/local/bin/docker-compose"
-    sha256sum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    sha256sum: "6cdd477424597c1f075c57848c96a8d37fe9dba39b857c1a05030d6d64830f0e"
+
+- name: Set permissions for docker-compose
+  file: name=/usr/local/bin/docker-compose mode=0755
 
 - name: Do not start on boot (let monit manage that)
   service: name={{ item }} enabled=no
