@@ -31,6 +31,12 @@
     src: swarm-manager.conf.j2
     dest: /etc/init/swarm-manager.conf
 
+- name: Download Docker Compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.2.0rc2/docker-compose-Linux-x86_64"
+    dest: "/usr/local/bin/docker-compose"
+    sha256sum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
 - name: Do not start on boot (let monit manage that)
   service: name={{ item }} enabled=no
   with_items:
