@@ -4,12 +4,11 @@ Manage your flock of containers.
 
 ## Basic idea
 
-* The system is self contained w/o no need of external commands.
-* Ansible is used to setup the remote systems.
+* The system is self contained w/o no need of external commands and tools.
+* Ansible is used to setup the remote systems (or use docker).
 * The machines are in a mesh network in a master-master setup.
 
 ## Technology
-
 
 ### Tinc VPN
 
@@ -31,8 +30,14 @@ the internet. Be careful to expose this to untrusted containers.
 The container manager Docker is installed on all nodes. Docker listens on both the
 default unix socket and on the internal VPN.
 
-### etcd
+### Swarm
 
-etcd is a clustered key/value storage. It runs inside a docker container on every 
-host and is exposed to the user at `172.17.42.1:4001`. It uses the management network 
-to talk to the other peers.
+Docker Swarm is installed on all nodes, both the agent and manager.
+
+### Consul
+
+Consul is installed on all hosts.
+
+### Monit
+
+Monit is used to keep track on processes and (re)start them if needed.
