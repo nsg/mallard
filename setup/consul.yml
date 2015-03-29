@@ -1,0 +1,53 @@
+---
+
+- hosts: all
+  vars:
+    consul:
+      filename: "0.5.0_linux_amd64.zip"
+      sha256: 161f2a8803e31550bd92a00e95a3a517aa949714c19d3124c46e56cfdc97b088
+      user: consul
+      group: consul
+
+  tasks:
+    - name: Download consul
+      get_url:
+        url: "https://dl.bintray.com/mitchellh/consul/{{ consul.filename }}"
+        dest: "/var/tmp/{{ consul.filename }}"
+        sha256sum: "{{ consul.sha256 }}"
+      register: consul_downloaded
+
+    - name: Install unzip
+      apt: name=unzip
+
+    - name: Install consul
+      shell: "unzip -o /var/tmp/{{ consul.filename }} chdir=/usr/local/bin"
+      when: consul_downloaded|changed
+
+    - name: Create consul group
+      group: name={{ consul.user }} state=present
+
+    - name: Create consul user
+      user: name=consul group={{ consul.user }} state=present
+
+    - name: Setup consul directories (root user)
+      file: path={{ item }} owner=root group=root state=directory
+      with_items:
+        - /etc/consul.d
+
+    - name: Setup consul directories (consul user)
+      file: path={{ item }} owner={{ consul.user }} group={{ consul.group }} state=directory
+      with_items:
+        - /var/lib/consul
+
+    - name: Install init script
+      template:
+        src: templates/consul.conf.j2
+        dest: /etc/init/consul.conf
+      notify: restart consul
+
+    - name: No not start consul service at boot (monit manage this)
+      service: name=consul enabled=no
+
+  handlers:
+    - name: restart consul
+      service: name=consul state=restarted

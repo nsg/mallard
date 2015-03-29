@@ -17,25 +17,24 @@ check process docker with pidfile /var/run/docker.pid
   stop program "/usr/sbin/service docker stop"
   depends on tinc_mallard
 
+check process consul with pidfile /var/run/consul.pid
+  start program "/usr/sbin/service consul start"
+  stop program "/usr/sbin/service consul stop"
+  depends on tinc_mallard
+
 check process tinc_mallard with pidfile /var/run/tinc.mallard.pid
   start program "/usr/sbin/service tinc start"
   stop program "/usr/sbin/service tinc stop"
 
-check process etcd pidfile /var/run/etcd.pid
-  if failed host {{ ansible_mallard.ipv4.address }} port 4001 then restart
-  stop program "/usr/local/bin/etcd-manager stop"
-  start program "/usr/local/bin/etcd-manager start"
-  depends on docker
-
 check process swarm-agent pidfile /var/run/swarm-agent.pid
-  stop program "/usr/local/bin/swarm-manager agent stop"
-  start program "/usr/local/bin/swarm-manager agent start"
-  depends on etcd
+  start program "/usr/sbin/service swarm-agent start"
+  stop program "/usr/sbin/service swarm-agent stop"
+  depends on consul
 
 check process swarm-manager pidfile /var/run/swarm-manager.pid
-  stop program "/usr/local/bin/swarm-manager manager stop"
-  start program "/usr/local/bin/swarm-manager manager start"
-  depends on swarm-agent
+  start program "/usr/sbin/service swarm-manager start"
+  stop program "/usr/sbin/service swarm-manager stop"
+  depends on consul
 
 {% for host in groups['all'] %}
 {% if host != ansible_hostname %}

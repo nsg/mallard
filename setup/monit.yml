@@ -11,40 +11,6 @@
         dest: /etc/monit/monitrc
       notify: restart monit
 
-    - name: Install etcd-manager
-      template:
-        src: templates/etcd-manager.j2
-        dest: /usr/local/bin/etcd-manager
-        mode: 0750
-      notify:
-        - restart monit
-        - stop etcd
-
-    - name: Install swarm-manager
-      template:
-        src: templates/swarm-manager.j2
-        dest: /usr/local/bin/swarm-manager
-        mode: 0750
-      notify:
-        - restart monit
-        - stop swarm agent
-        - stop swarm manager
-
-    - name: Install etcd_getIDbyName
-      template:
-        src: templates/etcd_getIDbyName.j2
-        dest: /usr/local/bin/etcd_getIDbyName
-        mode: 0750
-
   handlers:
     - name: restart monit
       service: name=monit state=restarted
-    - name: stop etcd
-      shell: docker stop etcd
-      ignore_errors: yes
-    - name: stop swarm agent
-      shell: docker stop swarm-agent
-      ignore_errors: yes
-    - name: stop swarm manager
-      shell: docker stop swarm-manager
-      ignore_errors: yes

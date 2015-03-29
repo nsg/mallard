@@ -1,0 +1,21 @@
+description "Docker Swarm manager container"
+start on filesystem and started docker
+stop on runlevel [!2345]
+respawn
+
+pre-start script
+  docker rm swarm-manager || :
+end script
+
+script
+  echo $$ > /var/run/swarm-manager.pid
+  /usr/bin/docker run --rm=false \
+    --name="swarm-manager" \
+    -p {{ ansible_mallard.ipv4.address }}:2475:2375 \
+    swarm manage \
+      consul://{{ ansible_mallard.ipv4.address }}:8500/swarm
+end script
+
+post-stop script
+  rm /var/run/swarm-manager.pid
+end script

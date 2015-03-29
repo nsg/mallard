@@ -1,0 +1,26 @@
+description "Consul Server"
+start on (local-filesystems and net-device-up IFACE!=lo)
+stop on runlevel [016]
+pre-start script
+  echo 1 > /var/run/consul.pid
+  chown {{ consul.user }}:{{ consul.group }} /var/run/consul.pid
+end script
+  exec sudo -u {{ consul.user }} -g {{ consul.group }} \
+    /usr/local/bin/consul agent \
+{% if ansible_mallard.ipv4.address.split('.')[3]|int < 4 %}
+    -server \
+    -bootstrap-expect 3 \
+{% endif %}
+    -config-dir /etc/consul.d \
+    -data-dir /var/lib/consul \
+    -bind {{ ansible_mallard.ipv4.address }} \
+    -client {{ ansible_mallard.ipv4.address }} \
+    -dc mallard \
+    -pid-file /var/run/consul.pid \
+{% for host in groups['all'] %}
+    -join {{ hostvars[host]['ansible_mallard']['ipv4']['address'] }} \
+{% endfor %}
+    >> /var/log/consul.log 2>&1
+respawn
+respawn limit 10 10
+kill timeout 10
