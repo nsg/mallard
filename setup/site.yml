@@ -24,3 +24,6 @@
 
     # Setup consul
     - consul
+
+    # Install mallard tool
+    - mallard

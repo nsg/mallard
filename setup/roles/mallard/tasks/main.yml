@@ -1,0 +1,7 @@
+---
+
+- name: Install mallard script
+  template:
+    src: mallard.j2
+    dest: /usr/local/bin/mallard
+    mode: 0755

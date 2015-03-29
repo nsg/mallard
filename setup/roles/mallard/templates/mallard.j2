@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+import json
+import yaml
+import argparse
+import urllib
+import urllib2
+import sys
+import datetime
+import subprocess
+
+swarm_host = "{{ ansible_mallard.ipv4.address }}"
+swarm_hosts = [{% for host in groups['all'] %}"{{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}", {% endfor %}]
+swarm_port = 2475
+
+def color(string, color="0", bold=False):
+    attr = []
+    attr.append(color)
+
+    if bold:
+        attr.append('1')
+
+    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
+
+def callapi(path):
+    response = urllib2.urlopen("http://{}:{}/{}".format(swarm_host, swarm_port, path))
+    return json.loads(response.read())
+
+def get_containers():
+    return callapi("/containers/json")
+
+def deploy_container(url, compose):
+    if url == "-":
+        yaml_data = "".join(sys.stdin.readlines())
+        fd = open('/tmp/docker-compose.yml', 'w')
+        fd.write(yaml_data)
+        fd.close()
+        subprocess.call(["docker-compose"] + compose.split(" "))
+
+def print_containers():
+    for c in get_containers():
+        print()
+        print(color("Container: {} ({})".format(c['Id'][:12], c['Image']), bold=True))
+        print("Deployed: {} ({})".format( 
+            datetime.datetime.fromtimestamp(float(c['Created'])).strftime('%Y-%m-%d %H:%M:%S'),
+            c['Status']))
+        print("Deployed to:")
+        for n in c['Names']:
+            _, host, name = n.split("/")
+            print("\t{} ({})".format(host, name))
+        print()
+
+def main(argv):
+    parser = argparse.ArgumentParser(description='Mallard container deployment')
+    parser.add_argument('--list', help='List all containers', action="store_true")
+    parser.add_argument('--deploy', help='Deploy a container')
+    parser.add_argument('--compose', help='Compose command')
+    parser.add_argument('--json', help='List all containers in JSON', action="store_true")
+    args = parser.parse_args()
+
+    if args.json:
+        print(json.dumps(get_containers()))
+    
+    if args.list:
+        print_containers()
+
+    if args.deploy and args.compose:
+        deploy_container(args.deploy, args.compose)
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
