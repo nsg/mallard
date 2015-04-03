@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+import sys
+import datetime
+import re
+from mallard.utils import *
+
+def container(show):
+    c = search_for_container(show)
+    print("Container ", color(c['Id'][:12], bold=True))
+    print("Image     ", c['Image'])
+    print("Created   ", datetime.datetime.fromtimestamp(float(c['Created'])).strftime('%Y-%m-%d %H:%M:%S'))
+    print("Command   ", c['Command'])
+    names = []
+    hosts = []
+    for name in c['Names']:
+        names.append(name.split("/")[2])
+        hosts.append(name.split("/")[1])
+    print("Hosts     ", ", ".join(hosts))
+    print("Names     ", ", ".join(names))
+    ports = []
+    for port in c['Ports']:
+        ports.append("{}:{}:{}/{}".format(port['IP'], 
+            port['PublicPort'], port['PrivatePort'], port['Type']))
+    print("Ports     ", ", ".join(ports))
+

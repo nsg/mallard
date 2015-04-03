@@ -5,3 +5,27 @@
     src: mallard.j2
     dest: /usr/local/bin/mallard
     mode: 0755
+
+- name: Get python module path
+  shell: python -c 'import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())'
+  register: python_path
+  changed_when: False
+
+- name: Make mallard module dir
+  file: path={{ python_path.stdout }}/mallard state=directory
+  register: mallard_dir
+
+- name: Make mallard/__init__.py
+  file: path={{ python_path.stdout }}/mallard/__init__.py state=touch
+  when: mallard_dir|changed
+
+- name: Install mallard modules
+  template:
+    src: "{{ item }}.py.j2"
+    dest: "{{ python_path.stdout }}/{{ item }}.py"
+    mode: 0644
+  with_items:
+    - mallard/utils
+    - mallard/list
+    - mallard/show
+    - mallard/compose

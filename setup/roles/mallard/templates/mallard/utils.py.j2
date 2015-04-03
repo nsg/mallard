@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import urllib
+import urllib2
+import json
+import re
+
+swarm_host = "{{ ansible_mallard.ipv4.address }}"
+swarm_hosts = [{% for host in groups['all'] %}"{{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}", {% endfor %}]
+swarm_port = 2475
+
+def color(string, color="0", bold=False, reverse=False, underline=False):
+    attr = []
+    attr.append(color)
+
+    if bold:
+        attr.append('1')
+    elif reverse:
+        attr.append('7')
+    elif underline:
+        attr.append('4')
+
+    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
+
+def callapi(path):
+    response = urllib2.urlopen("http://{}:{}/{}".format(swarm_host, swarm_port, path))
+    return json.loads(response.read())
+
+def search_for_container(name):
+    for c in get_containers():
+        if re.match(name, c['Id']) is not None:
+            return c
+        for n in c['Names']:
+            if re.match(name, n.split("/")[2]) is not None:
+                return c
+
+def get_containers():
+    return callapi("/containers/json")

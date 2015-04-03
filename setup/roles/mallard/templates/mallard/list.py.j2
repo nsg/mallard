@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+import datetime
+from mallard.utils import *
+
+def get():
+    return callapi("/containers/json")
+
+def containers(full):
+    containers = get()
+    print(color(("I found {} ducklings swimming in the pound.".
+        format(len(containers)).ljust(76,"_")),underline=True))
+
+    for c in containers:
+        print(color("{}".format(c['Id'][:12]), bold=True), end="")
+        print("/{}".format(c['Image'][:12].ljust(12," ")), end="\t")
+        print("{}".format(
+            datetime.datetime.fromtimestamp(float(c['Created'])).strftime('%Y-%m-%d %H:%M:%S')), end="\t")
+        for n in c['Names']:
+            print("\t{}".format(n), end=" ")
+        print()
