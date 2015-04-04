@@ -8,10 +8,12 @@ from mallard.utils import *
 import mallard.list
 import mallard.show
 import mallard.compose
+import mallard.swarm
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Mallard container deployment')
     parser.add_argument('--list', help='List all containers', action="store_true")
+    parser.add_argument('--swarm', help='List the swarm', action="store_true")
     parser.add_argument('--full', help='Show more information', action="store_true")
     parser.add_argument('--show', help='Show container info by ID or name')
     parser.add_argument('--compose', help='Compose command')
@@ -19,6 +21,9 @@ def main(argv):
 
     if args.list:
         mallard.list.containers(args.full)
+
+    if args.swarm:
+        mallard.swarm.list()
 
     if args.compose:
         mallard.compose.container(args.compose)

@@ -9,6 +9,7 @@ import re
 swarm_host = "{{ ansible_mallard.ipv4.address }}"
 swarm_hosts = [{% for host in groups['all'] %}"{{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}", {% endfor %}]
 swarm_port = 2475
+consul_port = 8500
 
 def color(string, color="0", bold=False, reverse=False, underline=False):
     attr = []
@@ -23,8 +24,12 @@ def color(string, color="0", bold=False, reverse=False, underline=False):
 
     return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
 
-def callapi(path):
-    response = urllib2.urlopen("http://{}:{}/{}".format(swarm_host, swarm_port, path))
+def callapi(path, host=swarm_host, port=swarm_port):
+    response = urllib2.urlopen("http://{}:{}/{}".format(host, port, path))
+    return json.loads(response.read())
+
+def callconsulapi(path):
+    response = urllib2.urlopen("http://{}:{}/{}".format(swarm_host, consul_port, path))
     return json.loads(response.read())
 
 def search_for_container(name):
