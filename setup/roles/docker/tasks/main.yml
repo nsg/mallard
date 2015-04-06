@@ -46,3 +46,10 @@
     - docker
     - swarm-agent
     - swarm-manager
+
+- name: Download docker-gc
+  get_url:
+    url: "https://raw.githubusercontent.com/spotify/docker-gc/1b5d533172fa3707dcd4e5a4a3b7cd25d6e6e237/docker-gc"
+    dest: /etc/cron.hourly/docker-gc
+    sha256sum: "a406b7bb75b372e698c944cf53d069391c3d2a115f0e6fd7146d48fa364eea76"
+    mode: 0755
