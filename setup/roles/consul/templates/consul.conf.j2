@@ -18,7 +18,9 @@ end script
     -dc mallard \
     -pid-file /var/run/consul.pid \
 {% for host in groups['all'] %}
+{% if hostvars[host]['ansible_mallard']['ipv4']['address'].split('.')[3]|int < 4 %}
     -join {{ hostvars[host]['ansible_mallard']['ipv4']['address'] }} \
+{% endif %}
 {% endfor %}
     >> /var/log/consul.log 2>&1
 respawn
