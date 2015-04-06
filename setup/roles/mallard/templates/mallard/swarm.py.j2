@@ -6,7 +6,17 @@ import datetime
 import json
 from mallard.utils import *
 
+def check_leader():
+    if len(callconsulapi("/v1/status/leader")) > 0:
+        return True
+    return False
+
 def list():
+
+    if not check_leader():
+        print("consul: No leader elected")
+        return
+
     print(color("The swarm contains these hosts".ljust(76,"_"),underline=True))
     print("IP".ljust(9," "), end=" ")
     print("CONT".ljust(8," "), end=" ")
