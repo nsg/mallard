@@ -9,12 +9,14 @@ import mallard.list
 import mallard.show
 import mallard.compose
 import mallard.swarm
+import mallard.consul
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Mallard container deployment')
     parser.add_argument('--list', help='List all containers', action="store_true")
     parser.add_argument('--swarm', help='List the swarm', action="store_true")
     parser.add_argument('--full', help='Show more information', action="store_true")
+    parser.add_argument('--consul', help='List consul status', action="store_true")
     parser.add_argument('--show', help='Show container info by ID or name')
     parser.add_argument('--compose', help='Compose command')
     args = parser.parse_args()
@@ -30,6 +32,9 @@ def main(argv):
 
     if args.show:
         mallard.show.container(args.show)
+
+    if args.consul:
+        mallard.consul.list()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

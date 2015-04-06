@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+import datetime
+from mallard.utils import *
+
+def list():
+    leader = callconsulapi("/v1/status/leader")
+    if len(leader) > 0:
+        print("Leader:   {}".format(leader))
+    else:
+        print("Warning: No leaader found!")
+    for peer in callconsulapi("/v1/status/peers"):
+        if peer != leader:
+            print("Follower: {}".format(peer))

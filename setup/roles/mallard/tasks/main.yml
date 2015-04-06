@@ -30,3 +30,4 @@
     - mallard/show
     - mallard/compose
     - mallard/swarm
+    - mallard/consul
