@@ -13,27 +13,43 @@ import mallard.consul
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Mallard container deployment')
-    parser.add_argument('--list', help='List all containers', action="store_true")
-    parser.add_argument('--swarm', help='List the swarm', action="store_true")
+    subparsers = parser.add_subparsers(help='Available commands', dest="command")
+
+    # Global flags
     parser.add_argument('--full', help='Show more information', action="store_true")
-    parser.add_argument('--consul', help='List consul status', action="store_true")
-    parser.add_argument('--show', help='Show container info by ID or name')
-    parser.add_argument('--deploy', help='Specify image to deploy')
+
+    # Deploy parser
+    deploy_parser = subparsers.add_parser('deploy', help='Deploy a container')
+    deploy_parser.add_argument('image', help='Specify image')
+
+    # List parser
+    list_parser = subparsers.add_parser('list', help='List all containers')
+
+    # Swarm parser
+    swarm_parser = subparsers.add_parser('swarm', help='List the swarm')
+
+    # Consul parser
+    consul_parser = subparsers.add_parser('consul', help='List consul status')
+
+    # Show parser
+    show_parser = subparsers.add_parser('show', help='Show container info by ID or name')
+    show_parser.add_argument('id', help='Name or ID')
+
     args = parser.parse_args()
 
-    if args.list:
+    if args.command == "list":
         mallard.list.containers(args.full)
 
-    if args.swarm:
+    if args.command == "swarm":
         mallard.swarm.list()
 
-    if args.deploy:
-        mallard.container.deploy(args.deploy)
+    if args.command == "deploy":
+        mallard.container.deploy(args.image)
 
-    if args.show:
-        mallard.show.container(args.show)
+    if args.command == "show":
+        mallard.show.container(args.id)
 
-    if args.consul:
+    if args.command == "consul":
         mallard.consul.list()
 
 if __name__ == '__main__':
