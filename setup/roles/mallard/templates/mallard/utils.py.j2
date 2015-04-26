@@ -29,12 +29,31 @@ def color(string, color="0", bold=False, reverse=False, underline=False):
         return string
 
 def callapi(path, host=swarm_host, port=swarm_port):
-    response = urllib2.urlopen("http://{}:{}/{}".format(host, port, path))
-    return json.loads(response.read())
+    try:
+        response = urllib2.urlopen("http://{}:{}/{}".format(host, port, path))
+        return json.loads(response.read())
+    except:
+        print "Failed to open http://{}:{}/{}".format(host, port, path)
+    return None
+
+def callapi_post(path, host=swarm_host, port=swarm_port, data={}):
+    try:
+        req = urllib2.Request("http://{}:{}/{}".format(host, port, path), json.dumps(data))
+        req.add_header("Content-Type",'application/json')
+        response = urllib2.urlopen(req)
+        return response.read()
+    except:
+        print "Failed to open http://{}:{}/{}".format(host, port, path)
+        print "Data {}".format(urllib.urlencode(data))
+    return None
 
 def callconsulapi(path):
-    response = urllib2.urlopen("http://{}:{}/{}".format(swarm_host, consul_port, path))
-    return json.loads(response.read())
+    try:
+        response = urllib2.urlopen("http://{}:{}/{}".format(swarm_host, consul_port, path))
+        return json.loads(response.read())
+    except:
+        print "Failed to open http://{}:{}/{}".format(swarm_host, consul_port, path)
+    return None
 
 def search_for_container(name):
     for c in get_containers():
@@ -45,4 +64,4 @@ def search_for_container(name):
                 return c
 
 def get_containers():
-    return callapi("/containers/json")
+    return callapi("containers/json")
