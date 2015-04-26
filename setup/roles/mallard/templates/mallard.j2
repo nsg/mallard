@@ -7,7 +7,7 @@ import sys
 from mallard.utils import *
 import mallard.list
 import mallard.show
-import mallard.compose
+import mallard.container
 import mallard.swarm
 import mallard.consul
 
@@ -18,7 +18,7 @@ def main(argv):
     parser.add_argument('--full', help='Show more information', action="store_true")
     parser.add_argument('--consul', help='List consul status', action="store_true")
     parser.add_argument('--show', help='Show container info by ID or name')
-    parser.add_argument('--compose', help='Compose command')
+    parser.add_argument('--deploy', help='Specify image to deploy')
     args = parser.parse_args()
 
     if args.list:
@@ -27,8 +27,8 @@ def main(argv):
     if args.swarm:
         mallard.swarm.list()
 
-    if args.compose:
-        mallard.compose.container(args.compose)
+    if args.deploy:
+        mallard.container.deploy(args.deploy)
 
     if args.show:
         mallard.show.container(args.show)

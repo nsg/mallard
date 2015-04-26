@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+import datetime
+import sys
+import subprocess
+import json
+import mallard.utils
+
+def deploy(image):
+    image = create(image)
+    print(start(image['Id']))
+
+def create(image):
+    data = { "Image": image }
+    ret = mallard.utils.callapi_post("containers/create", data=data)
+    try:
+        return json.loads(ret)
+    except:
+        print("Error: Faild to create image")
+        print(ret)
+        sys.exit(1)
+
+def start(uuid):
+    ret = mallard.utils.callapi_post("containers/{}/start".format(uuid))
+    if len(ret) > 0:
+        print("Error: Faild to start image {}".format(uuid))
+        print(ret)
+        sys.exit(1)

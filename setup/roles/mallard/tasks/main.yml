@@ -28,6 +28,6 @@
     - mallard/utils
     - mallard/list
     - mallard/show
-    - mallard/compose
+    - mallard/container
     - mallard/swarm
     - mallard/consul

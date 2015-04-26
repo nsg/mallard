@@ -7,7 +7,7 @@ import json
 from mallard.utils import *
 
 def check_leader():
-    if len(callconsulapi("/v1/status/leader")) > 0:
+    if len(callconsulapi("v1/status/leader")) > 0:
         return True
     return False
 
@@ -24,11 +24,11 @@ def list():
     print("MEM".ljust(7," "), end=" ")
     print("DISK".ljust(22," "), end=" ")
     print()
-    for s in callconsulapi("/v1/kv/swarm/?recurse"):
+    for s in callconsulapi("v1/kv/swarm/?recurse"):
         if re.match("^swarm/10.10", s['Key']) is not None:
             host = re.split("/|:", s['Key'])[1]
-            h = callapi("/info", host=host, port=2375)
-            run = callapi("/containers/json", host=host, port=2375)
+            h = callapi("info", host=host, port=2375)
+            run = callapi("containers/json", host=host, port=2375)
             co = "{}/{}".format(len(run), h['Containers'])
 
             for ds in h['DriverStatus']:
