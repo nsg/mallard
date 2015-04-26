@@ -5,6 +5,7 @@ import urllib
 import urllib2
 import json
 import re
+import sys
 
 swarm_host = "{{ ansible_mallard.ipv4.address }}"
 swarm_hosts = [{% for host in groups['all'] %}"{{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}", {% endfor %}]
@@ -22,7 +23,10 @@ def color(string, color="0", bold=False, reverse=False, underline=False):
     elif underline:
         attr.append('4')
 
-    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
+    if sys.stdout.isatty():
+        return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
+    else:
+        return string
 
 def callapi(path, host=swarm_host, port=swarm_port):
     response = urllib2.urlopen("http://{}:{}/{}".format(host, port, path))
