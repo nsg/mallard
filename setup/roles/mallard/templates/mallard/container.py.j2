@@ -8,13 +8,15 @@ import subprocess
 import json
 import mallard.utils
 
-def deploy(image):
-    image = create(image)
+def deploy(image, name):
+    image = create(image, name)
     print(start(image['Id']))
 
-def create(image):
+def create(image, name):
     data = { "Image": image }
-    ret = mallard.utils.callapi_post("containers/create", data=data)
+    url = "containers/create"
+    if name: url = "{}?name={}".format(url, name)
+    ret = mallard.utils.callapi_post(url, data=data)
     try:
         return json.loads(ret)
     except:
