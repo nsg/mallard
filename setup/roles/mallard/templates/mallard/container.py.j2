@@ -7,6 +7,7 @@ import sys
 import subprocess
 import json
 import mallard.utils
+import re
 
 def deploy(image, name):
     image = create(image, name)
@@ -15,6 +16,9 @@ def deploy(image, name):
 def create(image, name):
     data = { "Image": image }
     url = "containers/create"
+    if name and not re.compile("^[a-zA-Z0-9_-]+$").match(name):
+        print("Error: '{}' is a invalid name.".format(name))
+        sys.exit(1)
     if name: url = "{}?name={}".format(url, name)
     ret = mallard.utils.callapi_post(url, data=data)
     try:
