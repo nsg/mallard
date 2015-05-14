@@ -19,9 +19,8 @@ def main(argv):
     parser.add_argument('--full', help='Show more information', action="store_true")
 
     # Deploy parser
-    deploy_parser = subparsers.add_parser('deploy', help='Deploy a container')
-    deploy_parser.add_argument('image', help='Specify image')
-    deploy_parser.add_argument('--name', help='Name the container', default=None)
+    deploy_parser = subparsers.add_parser('deploy', help='Deploy a duck')
+    deploy_parser.add_argument('app', help='Specify app name')
 
     # List parser
     list_parser = subparsers.add_parser('list', help='List all containers')
@@ -45,7 +44,7 @@ def main(argv):
         mallard.swarm.list()
 
     if args.command == "deploy":
-        mallard.container.deploy(args.image, args.name)
+        mallard.container.deploy(args.app)
 
     if args.command == "show":
         mallard.show.container(args.id)

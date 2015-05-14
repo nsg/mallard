@@ -8,10 +8,21 @@ import subprocess
 import json
 import mallard.utils
 import re
+import base64
 
-def deploy(image, name):
-    image = create(image, name)
-    print(start(image['Id']))
+def get_kv_data(app):
+    return mallard.utils.callconsulapi("/v1/kv/mallard/apps/{}".format(app))
+
+def deploy(app):
+    print("Deploy app {}".format(app))
+    data = get_kv_data(app)
+    if not data:
+        print("Error: app {} not found")
+        sys.exit(1)
+    value = base64.b64decode(data[0]['Value'])
+    jvalue = json.loads(value)
+    image = create(jvalue['image'], jvalue.get('name'))
+    start(image['Id'])
 
 def create(image, name):
     data = { "Image": image }
@@ -19,6 +30,7 @@ def create(image, name):
     if name and not re.compile("^[a-zA-Z0-9_-]+$").match(name):
         print("Error: '{}' is a invalid name.".format(name))
         sys.exit(1)
+    print("Use image: {}".format(image))
     if name: url = "{}?name={}".format(url, name)
     ret = mallard.utils.callapi_post(url, data=data)
     try:
@@ -29,6 +41,7 @@ def create(image, name):
         sys.exit(1)
 
 def start(uuid):
+    print("Start container {}".format(uuid))
     ret = mallard.utils.callapi_post("containers/{}/start".format(uuid))
     if len(ret) > 0:
         print("Error: Faild to start image {}".format(uuid))
