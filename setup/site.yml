@@ -25,5 +25,8 @@
     # Setup consul
     - consul
 
+    # Setup haproxy
+    - haproxy
+
     # Install mallard tool
     - mallard

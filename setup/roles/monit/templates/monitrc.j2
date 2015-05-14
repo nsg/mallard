@@ -36,6 +36,11 @@ check process swarm-manager pidfile /var/run/swarm-manager.pid
   stop program "/usr/sbin/service swarm-manager stop"
   depends on consul
 
+check process haproxy pidfile /var/run/haproxy.pid
+  start program "/usr/sbin/service haproxy start"
+  stop program "/usr/sbin/service haproxy stop"
+  depends on consul
+
 {% for host in groups['all'] %}
 {% if host != ansible_hostname %}
 check host {{ host }} with address {{ hostvars[host]['ansible_mallard']['ipv4']['address'] }}
