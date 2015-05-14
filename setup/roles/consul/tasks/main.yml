@@ -38,3 +38,17 @@
 
 - name: No not start consul service at boot (monit manage this)
   service: name=consul enabled=no
+
+- name: Create /var/consul
+  file: path=/var/consul state=directory
+
+- name: Download Web UI
+  get_url:
+    url: https://dl.bintray.com/mitchellh/consul/0.5.0_web_ui.zip
+    dest: /var/consul/0.5.0_web_ui.zip
+    sha256sum: 0081d08be9c0b1172939e92af5a7cf9ba4f90e54fae24a353299503b24bb8be9
+  register: new_webui
+
+- name: Unzip Web UI
+  command: unzip 0.5.0_web_ui.zip chdir=/var/consul
+  when: new_webui|changed

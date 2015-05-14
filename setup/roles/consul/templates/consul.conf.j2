@@ -17,6 +17,7 @@ end script
     -client {{ ansible_mallard.ipv4.address }} \
     -dc mallard \
     -pid-file /var/run/consul.pid \
+    -ui-dir /var/consul/dist/ \
 {% for host in groups['all'] %}
 {% if hostvars[host]['ansible_mallard']['ipv4']['address'].split('.')[3]|int < 4 %}
     -join {{ hostvars[host]['ansible_mallard']['ipv4']['address'] }} \
