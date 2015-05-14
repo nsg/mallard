@@ -35,6 +35,10 @@ def main(argv):
     show_parser = subparsers.add_parser('show', help='Show container info by ID or name')
     show_parser.add_argument('id', help='Name or ID')
 
+    # Stop parser
+    stop_parser = subparsers.add_parser('stop', help='Stop app, by ID or name')
+    stop_parser.add_argument('id', help='Name or ID')
+
     args = parser.parse_args()
 
     if args.command == "list":
@@ -51,6 +55,9 @@ def main(argv):
 
     if args.command == "consul":
         mallard.consul.list()
+
+    if args.command == "stop":
+        mallard.container.stop(args.id)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

@@ -47,3 +47,13 @@ def start(uuid):
         print("Error: Faild to start image {}".format(uuid))
         print(ret)
         sys.exit(1)
+
+def stop(uuid_or_name):
+    c = mallard.utils.search_for_container(uuid_or_name)
+    uuid = c['Id']
+    print("Stop container {}".format(uuid))
+    ret = mallard.utils.callapi_post("containers/{}/stop".format(uuid))
+    if len(ret) > 0:
+        print("Error: Faild to stop image {}".format(uuid))
+        print(ret)
+        sys.exit(1)
